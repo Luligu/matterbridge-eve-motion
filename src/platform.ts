@@ -17,10 +17,14 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     motion.createDefaultIdentifyClusterServer();
     motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
     motion.createDefaultOccupancySensingClusterServer();
+
     motion.addDeviceType(DeviceTypes.LIGHT_SENSOR);
     motion.createDefaultIlluminanceMeasurementClusterServer();
+
     motion.createDefaultPowerSourceReplaceableBatteryClusterServer();
     motion.createDefaultPowerSourceConfigurationClusterServer(1);
+
+    // Add the EveHistory cluster to the device as last cluster!
     motion.createMotionEveHistoryClusterServer(history, this.log);
     history.autoPilot(motion);
 
@@ -42,7 +46,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
         motion.getClusterServerById(IlluminanceMeasurement.Cluster.id)?.setMeasuredValueAttribute(Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)));
 
         history.setLastEvent();
-        history.addEntry({ time: history.now(), motion: occupancy.occupied === true ? 0 : 1, lux: lux });
+        history.addEntry({ time: history.now(), motion: occupancy.occupied === true ? 0 : 1, lux });
         this.log.info(`Set motion to ${occupancy.occupied} and lux to ${lux}`);
       },
       60 * 1000 - 400,
