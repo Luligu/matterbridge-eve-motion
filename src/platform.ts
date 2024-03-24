@@ -65,5 +65,6 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     this.log.info('onShutdown called with reason:', reason ?? 'none');
     await this.history?.close();
     clearInterval(this.interval);
+    await this.unregisterAllDevices();
   }
 }
