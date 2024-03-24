@@ -1,4 +1,4 @@
-import { DeviceTypes, IlluminanceMeasurement, OccupancySensing } from 'matterbridge';
+import { DeviceTypes, IlluminanceMeasurement, OccupancySensing, PlatformConfig } from 'matterbridge';
 
 import { Matterbridge, MatterbridgeDevice, MatterbridgeAccessoryPlatform, MatterHistory } from 'matterbridge';
 import { AnsiLogger } from 'node-ansi-logger';
@@ -8,8 +8,8 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   history: MatterHistory | undefined;
   interval: NodeJS.Timeout | undefined;
 
-  constructor(matterbridge: Matterbridge, log: AnsiLogger) {
-    super(matterbridge, log);
+  constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
+    super(matterbridge, log, config);
   }
 
   override async onStart(reason?: string) {

@@ -1,4 +1,4 @@
-import { Matterbridge } from 'matterbridge';
+import { Matterbridge, PlatformConfig } from 'matterbridge';
 import { AnsiLogger } from 'node-ansi-logger';
 import { EveMotionPlatform } from './platform.js';
 
@@ -8,6 +8,6 @@ import { EveMotionPlatform } from './platform.js';
  *
  * @param matterbridge - An instance of MatterBridge
  */
-export default function initializePlugin(matterbridge: Matterbridge, log: AnsiLogger) {
-  return new EveMotionPlatform(matterbridge, log);
+export default function initializePlugin(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
+  return new EveMotionPlatform(matterbridge, log, config);
 }
