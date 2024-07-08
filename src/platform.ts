@@ -1,7 +1,6 @@
-import { DeviceTypes, IlluminanceMeasurement, OccupancySensing, PlatformConfig } from 'matterbridge';
-
-import { Matterbridge, MatterbridgeDevice, MatterbridgeAccessoryPlatform, MatterHistory } from 'matterbridge';
-import { AnsiLogger } from 'node-ansi-logger';
+import { DeviceTypes, IlluminanceMeasurement, OccupancySensing, PlatformConfig, Matterbridge, MatterbridgeDevice, MatterbridgeAccessoryPlatform, powerSource } from 'matterbridge';
+import { MatterHistory } from 'matterbridge/history';
+import { AnsiLogger } from 'matterbridge/logger';
 
 export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   motion: MatterbridgeDevice | undefined;
@@ -25,11 +24,11 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     this.motion.addDeviceType(DeviceTypes.LIGHT_SENSOR);
     this.motion.createDefaultIlluminanceMeasurementClusterServer();
 
+    this.motion.addDeviceType(powerSource);
     this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer();
-    this.motion.createDefaultPowerSourceConfigurationClusterServer(1);
 
     // Add the EveHistory cluster to the device as last cluster!
-    this.motion.createMotionEveHistoryClusterServer(this.history, this.log);
+    this.history.createMotionEveHistoryClusterServer(this.motion, this.log);
     this.history.autoPilot(this.motion);
 
     await this.registerDevice(this.motion);
