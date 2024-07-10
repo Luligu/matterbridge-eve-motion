@@ -10,9 +10,9 @@
 
 ---
 
-This plugin shows how to use the Matter history and how to create passive device in matter.js.
+This plugin shows how to use the Matter history and how to create a passive device in matter.js.
 
-It create a motion sensor with a light sensor device that continuously changes state.
+It create a virtual motion sensor with a light sensor device that continuously changes state.
 
 ## Prerequisites
 
