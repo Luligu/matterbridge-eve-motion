@@ -15,7 +15,7 @@
 
 This plugin shows how to use the Matter history and how to create a passive device in matter.js.
 
-It create a virtual motion sensor with a light sensor device that continuously changes state.
+It creates a virtual motion sensor with a light sensor device that continuously changes state.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-eve-motion and sponsoring it.
 
