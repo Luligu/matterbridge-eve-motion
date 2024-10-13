@@ -1,5 +1,5 @@
 import { DeviceTypes, IlluminanceMeasurement, OccupancySensing, PlatformConfig, Matterbridge, MatterbridgeDevice, MatterbridgeAccessoryPlatform, powerSource } from 'matterbridge';
-import { MatterHistory } from 'matterbridge/history';
+import { MatterHistory } from 'matter-history';
 import { AnsiLogger } from 'matterbridge/logger';
 
 export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
