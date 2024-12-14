@@ -1,4 +1,18 @@
-import { DeviceTypes, IlluminanceMeasurement, OccupancySensing, PlatformConfig, Matterbridge, MatterbridgeDevice, MatterbridgeAccessoryPlatform, powerSource } from 'matterbridge';
+import {
+  IlluminanceMeasurement,
+  OccupancySensing,
+  PlatformConfig,
+  Matterbridge,
+  MatterbridgeDevice,
+  MatterbridgeAccessoryPlatform,
+  powerSource,
+  DeviceTypeDefinition,
+  EndpointOptions,
+  AtLeastOne,
+  MatterbridgeEndpoint,
+  occupancySensor,
+  lightSensor,
+} from 'matterbridge';
 import { MatterHistory } from 'matter-history';
 import { AnsiLogger } from 'matterbridge/logger';
 
@@ -7,13 +21,20 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   history: MatterHistory | undefined;
   interval: NodeJS.Timeout | undefined;
 
+  createMutableDevice(definition: DeviceTypeDefinition | AtLeastOne<DeviceTypeDefinition>, options: EndpointOptions = {}, debug = false): MatterbridgeDevice {
+    let device: MatterbridgeDevice;
+    if (this.matterbridge.edge === true) device = new MatterbridgeEndpoint(definition, options, debug) as unknown as MatterbridgeDevice;
+    else device = new MatterbridgeDevice(definition, options, debug);
+    return device;
+  }
+
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.0')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.6')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "1.6.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "1.6.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -23,17 +44,13 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   override async onStart(reason?: string) {
     this.log.info('onStart called with reason:', reason ?? 'none');
 
-    this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory });
+    this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory, edge: this.matterbridge.edge });
 
-    this.motion = new MatterbridgeDevice(DeviceTypes.OCCUPANCY_SENSOR);
+    this.motion = this.createMutableDevice([occupancySensor, lightSensor, powerSource], { uniqueStorageKey: 'EveMotion' }, this.config.debug as boolean);
     this.motion.createDefaultIdentifyClusterServer();
     this.motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
     this.motion.createDefaultOccupancySensingClusterServer();
-
-    this.motion.addDeviceType(DeviceTypes.LIGHT_SENSOR);
     this.motion.createDefaultIlluminanceMeasurementClusterServer();
-
-    this.motion.addDeviceType(powerSource);
     this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer();
 
     // Add the EveHistory cluster to the device as last cluster!
@@ -46,24 +63,30 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
       this.log.warn(`Command identify called identifyTime:${identifyTime}`);
       this.history?.logHistory(false);
     });
+
+    this.motion.addCommandHandler('triggerEffect', async ({ request: { effectIdentifier, effectVariant } }) => {
+      this.log.warn(`Command triggerEffect called effect ${effectIdentifier} variant ${effectVariant}`);
+      this.history?.logHistory(false);
+    });
   }
 
   override async onConfigure() {
     this.log.info('onConfigure called');
 
     this.interval = setInterval(
-      () => {
+      async () => {
         if (!this.motion || !this.history) return;
-        const occupancy = this.motion.getClusterServerById(OccupancySensing.Cluster.id)?.getOccupancyAttribute();
-        if (!occupancy) return;
-        occupancy.occupied = !occupancy.occupied;
+        const occupancyAttribute = this.motion.getAttribute(OccupancySensing.Cluster.id, 'occupancy', this.log) as { occupied: boolean } | undefined;
+        if (!occupancyAttribute) return;
+        let { occupied } = occupancyAttribute;
+        occupied = !occupied;
         const lux = this.history.getFakeLevel(0, 1000, 0);
-        this.motion.getClusterServerById(OccupancySensing.Cluster.id)?.setOccupancyAttribute(occupancy);
-        this.motion.getClusterServerById(IlluminanceMeasurement.Cluster.id)?.setMeasuredValueAttribute(Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)));
+        await this.motion.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied }, this.log);
+        await this.motion.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)), this.log);
 
         this.history.setLastEvent();
-        this.history.addEntry({ time: this.history.now(), motion: occupancy.occupied === true ? 0 : 1, lux });
-        this.log.info(`Set motion to ${occupancy.occupied} and lux to ${lux}`);
+        this.history.addEntry({ time: this.history.now(), motion: occupied === true ? 0 : 1, lux });
+        this.log.info(`Set motion to ${occupied} and lux to ${lux}`);
       },
       60 * 1000 + 200,
     );
