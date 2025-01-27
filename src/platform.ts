@@ -3,12 +3,8 @@ import {
   OccupancySensing,
   PlatformConfig,
   Matterbridge,
-  MatterbridgeDevice,
   MatterbridgeAccessoryPlatform,
   powerSource,
-  DeviceTypeDefinition,
-  EndpointOptions,
-  AtLeastOne,
   MatterbridgeEndpoint,
   occupancySensor,
   lightSensor,
@@ -17,24 +13,17 @@ import { MatterHistory } from 'matter-history';
 import { AnsiLogger } from 'matterbridge/logger';
 
 export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
-  motion: MatterbridgeDevice | undefined;
+  motion: MatterbridgeEndpoint | undefined;
   history: MatterHistory | undefined;
   interval: NodeJS.Timeout | undefined;
-
-  createMutableDevice(definition: DeviceTypeDefinition | AtLeastOne<DeviceTypeDefinition>, options: EndpointOptions = {}, debug = false): MatterbridgeDevice {
-    let device: MatterbridgeDevice;
-    if (this.matterbridge.edge === true) device = new MatterbridgeEndpoint(definition, options, debug) as unknown as MatterbridgeDevice;
-    else device = new MatterbridgeDevice(definition, options, debug);
-    return device;
-  }
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('1.6.6')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.1.0')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "1.6.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "2.1.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -44,9 +33,9 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   override async onStart(reason?: string) {
     this.log.info('onStart called with reason:', reason ?? 'none');
 
-    this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory, edge: this.matterbridge.edge });
+    this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory });
 
-    this.motion = this.createMutableDevice([occupancySensor, lightSensor, powerSource], { uniqueStorageKey: 'EveMotion' }, this.config.debug as boolean);
+    this.motion = new MatterbridgeEndpoint([occupancySensor, lightSensor, powerSource], { uniqueStorageKey: 'Eve motion' }, this.config.debug as boolean);
     this.motion.createDefaultIdentifyClusterServer();
     this.motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
     this.motion.createDefaultOccupancySensingClusterServer();
@@ -60,12 +49,12 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     await this.registerDevice(this.motion);
 
     this.motion.addCommandHandler('identify', async ({ request: { identifyTime } }) => {
-      this.log.warn(`Command identify called identifyTime:${identifyTime}`);
+      this.log.info(`Command identify called identifyTime:${identifyTime}`);
       this.history?.logHistory(false);
     });
 
     this.motion.addCommandHandler('triggerEffect', async ({ request: { effectIdentifier, effectVariant } }) => {
-      this.log.warn(`Command triggerEffect called effect ${effectIdentifier} variant ${effectVariant}`);
+      this.log.info(`Command triggerEffect called effect ${effectIdentifier} variant ${effectVariant}`);
       this.history?.logHistory(false);
     });
   }
