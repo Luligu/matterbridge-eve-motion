@@ -87,13 +87,13 @@ describe('TestPlatform', () => {
     expect(mockLog.info).toHaveBeenCalledWith('onStart called with reason:', 'Test reason');
     expect(testPlatform.motion).toBeDefined();
     if (!testPlatform.motion) return;
-    expect(Object.keys(testPlatform.motion.behaviors.supported)).toHaveLength(6); // ["descriptor", "matterbridge", "identify", "occupancySensing", "illuminanceMeasurement", "powerSource"]
+    expect(Object.keys(testPlatform.motion.behaviors.supported)).toHaveLength(7); // ["descriptor", "matterbridge", "identify", "occupancySensing", "illuminanceMeasurement", "powerSource", "eveHistory"]
   });
 
   it('should call onConfigure', async () => {
     expect(testPlatform.motion).toBeDefined();
     if (!testPlatform.motion) return;
-    expect(Object.keys(testPlatform.motion.behaviors.supported)).toHaveLength(6); // ["descriptor", "matterbridge", "identify", "occupancySensing", "illuminanceMeasurement", "powerSource"]
+    expect(Object.keys(testPlatform.motion.behaviors.supported)).toHaveLength(7); // ["descriptor", "matterbridge", "identify", "occupancySensing", "illuminanceMeasurement", "powerSource", "eveHistory"]
 
     jest.useFakeTimers();
 
@@ -111,7 +111,7 @@ describe('TestPlatform', () => {
   it('should execute the commandHandlers', async () => {
     expect(testPlatform.motion).toBeDefined();
     if (!testPlatform.motion) return;
-    expect(Object.keys(testPlatform.motion.behaviors.supported)).toHaveLength(6); // ["descriptor", "matterbridge", "identify", "occupancySensing", "illuminanceMeasurement", "powerSource"]
+    expect(Object.keys(testPlatform.motion.behaviors.supported)).toHaveLength(7); // ["descriptor", "matterbridge", "identify", "occupancySensing", "illuminanceMeasurement", "powerSource", "eveHistory"]
     await testPlatform.motion.executeCommandHandler('identify', { identifyTime: 5 });
     await testPlatform.motion.executeCommandHandler('triggerEffect', { effectIdentifier: Identify.EffectIdentifier.Blink, effectVariant: Identify.EffectVariant.Default });
   });
