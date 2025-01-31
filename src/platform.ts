@@ -1,14 +1,5 @@
-import {
-  IlluminanceMeasurement,
-  OccupancySensing,
-  PlatformConfig,
-  Matterbridge,
-  MatterbridgeAccessoryPlatform,
-  powerSource,
-  MatterbridgeEndpoint,
-  occupancySensor,
-  lightSensor,
-} from 'matterbridge';
+import { PlatformConfig, Matterbridge, MatterbridgeAccessoryPlatform, powerSource, MatterbridgeEndpoint, occupancySensor, lightSensor } from 'matterbridge';
+import { IlluminanceMeasurement, OccupancySensing } from 'matterbridge/matter/clusters';
 import { MatterHistory } from 'matter-history';
 import { AnsiLogger } from 'matterbridge/logger';
 
