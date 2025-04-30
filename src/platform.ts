@@ -12,9 +12,9 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('2.2.6')) {
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.0.0')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "2.2.6". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "3.0.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
@@ -29,8 +29,8 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     this.motion = new MatterbridgeEndpoint([occupancySensor, lightSensor, powerSource], { uniqueStorageKey: 'Eve motion' }, this.config.debug as boolean);
     this.motion.createDefaultIdentifyClusterServer();
     this.motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
-    this.motion.createDefaultOccupancySensingClusterServer();
-    this.motion.createDefaultIlluminanceMeasurementClusterServer();
+    this.motion.createDefaultOccupancySensingClusterServer(false);
+    this.motion.createDefaultIlluminanceMeasurementClusterServer(250);
     this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer();
 
     // Add the EveHistory cluster to the device as last cluster!
@@ -52,6 +52,9 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
 
   override async onConfigure() {
     this.log.info('onConfigure called');
+
+    await this.motion?.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: false }, this.log);
+    await this.motion?.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(500) + 1, 0xfffe), 0)), this.log);
 
     this.interval = setInterval(
       async () => {
