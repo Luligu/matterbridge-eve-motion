@@ -7,6 +7,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   motion: MatterbridgeEndpoint | undefined;
   history: MatterHistory | undefined;
   interval: NodeJS.Timeout | undefined;
+  occupied = false;
 
   constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
@@ -59,17 +60,14 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     this.interval = setInterval(
       async () => {
         if (!this.motion || !this.history) return;
-        const occupancyAttribute = this.motion.getAttribute(OccupancySensing.Cluster.id, 'occupancy', this.log) as { occupied: boolean } | undefined;
-        if (!occupancyAttribute) return;
-        let { occupied } = occupancyAttribute;
-        occupied = !occupied;
+        this.occupied = !this.occupied;
         const lux = this.history.getFakeLevel(0, 1000, 0);
-        await this.motion.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied }, this.log);
+        await this.motion.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: this.occupied }, this.log);
         await this.motion.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)), this.log);
 
         this.history.setLastEvent();
-        this.history.addEntry({ time: this.history.now(), motion: occupied === true ? 0 : 1, lux });
-        this.log.info(`Set motion to ${occupied} and lux to ${lux}`);
+        this.history.addEntry({ time: this.history.now(), motion: this.occupied === true ? 0 : 1, lux });
+        this.log.info(`Set motion to ${this.occupied} and lux to ${lux}`);
       },
       60 * 1000 + 200,
     );
