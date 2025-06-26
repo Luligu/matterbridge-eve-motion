@@ -1,4 +1,4 @@
-# <img src="https://github.com/Luligu/matterbridge/blob/main/frontend/public/matterbridge%2064x64.png" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge eve motion with history
+# <img src="matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge eve motion with history
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-eve-motion.svg)](https://www.npmjs.com/package/matterbridge-eve-motion)
 [![npm downloads](https://img.shields.io/npm/dt/matterbridge-eve-motion.svg)](https://www.npmjs.com/package/matterbridge-eve-motion)
