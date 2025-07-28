@@ -27,7 +27,11 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
 
     this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory, enableDebug: this.config.debug as boolean });
 
-    this.motion = new MatterbridgeEndpoint([occupancySensor, lightSensor, powerSource], { uniqueStorageKey: 'Eve motion', mode: this.matterbridge.bridgeMode === 'bridge' ? 'server' : undefined }, this.config.debug as boolean);
+    this.motion = new MatterbridgeEndpoint(
+      [occupancySensor, lightSensor, powerSource],
+      { uniqueStorageKey: 'Eve motion', mode: this.matterbridge.bridgeMode === 'bridge' ? 'server' : undefined },
+      this.config.debug as boolean,
+    );
     this.motion.createDefaultIdentifyClusterServer();
     this.motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
     this.motion.createDefaultOccupancySensingClusterServer(false);
