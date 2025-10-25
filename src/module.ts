@@ -23,7 +23,7 @@
 
 import { MatterHistory } from 'matter-history';
 import { PlatformConfig, MatterbridgeAccessoryPlatform, powerSource, MatterbridgeEndpoint, occupancySensor, lightSensor, PlatformMatterbridge } from 'matterbridge';
-import { IlluminanceMeasurement, OccupancySensing } from 'matterbridge/matter/clusters';
+import { IlluminanceMeasurement, OccupancySensing, PowerSource } from 'matterbridge/matter/clusters';
 import { AnsiLogger } from 'matterbridge/logger';
 
 /**
@@ -72,7 +72,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     this.motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
     this.motion.createDefaultOccupancySensingClusterServer(false);
     this.motion.createDefaultIlluminanceMeasurementClusterServer(250);
-    this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer();
+    this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer(65, PowerSource.BatChargeLevel.Ok, 3000, 'CR2450', 2);
 
     // Add the EveHistory cluster to the device as last cluster!
     this.history.createMotionEveHistoryClusterServer(this.motion, this.log);
