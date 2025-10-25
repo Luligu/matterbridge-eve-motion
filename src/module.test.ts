@@ -103,6 +103,7 @@ describe('TestPlatform', () => {
     await testPlatform.onConfigure();
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'onConfigure called');
 
+    // Simulate multiple interval executions
     for (let i = 0; i < 20; i++) {
       await jest.advanceTimersByTimeAsync(61 * 1000);
     }
@@ -111,6 +112,8 @@ describe('TestPlatform', () => {
 
     expect(loggerLogSpy).toHaveBeenCalled();
     expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.ERROR, expect.anything());
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Set motion to true'));
+    expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, expect.stringContaining('Set motion to false'));
   });
 
   it('should execute the commandHandlers', async () => {
