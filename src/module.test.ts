@@ -2,7 +2,7 @@ const MATTER_PORT = 6000;
 const NAME = 'Platform';
 const HOMEDIR = path.join('jest', NAME);
 
-import path from 'node:path/win32';
+import path from 'node:path';
 
 import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import { Identify } from 'matterbridge/matter/clusters';

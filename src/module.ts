@@ -22,7 +22,7 @@
  */
 
 import { MatterHistory } from 'matter-history';
-import { PlatformConfig, Matterbridge, MatterbridgeAccessoryPlatform, powerSource, MatterbridgeEndpoint, occupancySensor, lightSensor } from 'matterbridge';
+import { PlatformConfig, MatterbridgeAccessoryPlatform, powerSource, MatterbridgeEndpoint, occupancySensor, lightSensor, PlatformMatterbridge } from 'matterbridge';
 import { IlluminanceMeasurement, OccupancySensing } from 'matterbridge/matter/clusters';
 import { AnsiLogger } from 'matterbridge/logger';
 
@@ -35,7 +35,7 @@ import { AnsiLogger } from 'matterbridge/logger';
  *  @param {PlatformConfig} config - The configuration for the platform.
  *  @returns {EveMotionPlatform} - An instance of the EveMotionPlatform.
  */
-export default function initializePlugin(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig): EveMotionPlatform {
+export default function initializePlugin(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: PlatformConfig): EveMotionPlatform {
   return new EveMotionPlatform(matterbridge, log, config);
 }
 
@@ -45,7 +45,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
   interval: NodeJS.Timeout | undefined;
   occupied = false;
 
-  constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
+  constructor(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: PlatformConfig) {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
