@@ -10,6 +10,7 @@ import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
 
 import {
+  addMatterbridgePlatform,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
   loggerLogSpy,
@@ -65,10 +66,8 @@ describe('TestPlatform', () => {
   });
 
   it('should initialize platform with config name', () => {
-    // @ts-expect-error accessing private member for testing
-    matterbridge.plugins._plugins.set('matterbridge-jest', {});
     testPlatform = new EveMotionPlatform(matterbridge, log, config);
-    testPlatform['name'] = 'matterbridge-jest';
+    addMatterbridgePlatform(testPlatform);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Initializing platform:', config.name);
   });
 
