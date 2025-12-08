@@ -8,17 +8,18 @@ import { PlatformConfig } from 'matterbridge';
 import { Identify } from 'matterbridge/matter/clusters';
 import { AnsiLogger, LogLevel, TimestampFormat } from 'matterbridge/logger';
 import { jest } from '@jest/globals';
-
 import {
   addMatterbridgePlatform,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
+  log,
   loggerLogSpy,
   matterbridge,
   setupTest,
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
-} from './utils/jestHelpers.js';
+} from 'matterbridge/jestutils';
+
 import initializePlugin, { EveMotionPlatform } from './module.js';
 
 // Setup the test environment
@@ -26,7 +27,6 @@ setupTest(NAME, false);
 
 describe('TestPlatform', () => {
   let testPlatform: EveMotionPlatform;
-  const log = new AnsiLogger({ logName: NAME, logTimestampFormat: TimestampFormat.TIME_MILLIS, logLevel: LogLevel.DEBUG });
 
   const config: PlatformConfig = {
     name: 'matterbridge-eve-motion',
@@ -62,7 +62,7 @@ describe('TestPlatform', () => {
   it('should not initialize platform with wrong version', () => {
     matterbridge.matterbridgeVersion = '1.5.0';
     expect(() => (testPlatform = new EveMotionPlatform(matterbridge, log, config))).toThrow();
-    matterbridge.matterbridgeVersion = '3.3.0';
+    matterbridge.matterbridgeVersion = '3.4.0';
   });
 
   it('should initialize platform with config name', () => {
