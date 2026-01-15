@@ -76,9 +76,10 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
 
     // Add the EveHistory cluster to the device as last cluster!
     this.history.createMotionEveHistoryClusterServer(this.motion, this.log);
-    this.history.autoPilot(this.motion);
 
     await this.registerDevice(this.motion);
+
+    this.history.autoPilot(this.motion);
 
     this.motion.addCommandHandler('identify', async ({ request: { identifyTime } }) => {
       this.log.info(`Command identify called identifyTime:${identifyTime}`);
