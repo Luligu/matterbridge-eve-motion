@@ -69,7 +69,16 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
       this.config.debug,
     );
     this.motion.createDefaultIdentifyClusterServer();
-    this.motion.createDefaultBasicInformationClusterServer('Eve motion', '0x85483499', 4874, 'Eve Systems', 89, 'Eve Motion 20EBY9901', 6650, '3.2.1');
+    this.motion.createDefaultBasicInformationClusterServer(
+      'Eve motion' + (this.matterbridge.bridgeMode === 'bridge' ? ' server' : ''),
+      '0x85483499',
+      4874,
+      'Eve Systems',
+      89,
+      'Eve Motion 20EBY9901',
+      6650,
+      '3.2.1',
+    );
     this.motion.createDefaultOccupancySensingClusterServer(false);
     this.motion.createDefaultIlluminanceMeasurementClusterServer(250);
     this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer(65, PowerSource.BatChargeLevel.Ok, 3000, 'CR2450', 2);
