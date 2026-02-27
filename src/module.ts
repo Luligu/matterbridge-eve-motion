@@ -22,9 +22,9 @@
  */
 
 import { MatterHistory } from 'matter-history';
-import { PlatformConfig, MatterbridgeAccessoryPlatform, powerSource, MatterbridgeEndpoint, occupancySensor, lightSensor, PlatformMatterbridge } from 'matterbridge';
-import { IlluminanceMeasurement, OccupancySensing, PowerSource } from 'matterbridge/matter/clusters';
+import { lightSensor, MatterbridgeAccessoryPlatform, MatterbridgeEndpoint, occupancySensor, PlatformConfig, PlatformMatterbridge, powerSource } from 'matterbridge';
 import { AnsiLogger } from 'matterbridge/logger';
+import { IlluminanceMeasurement, OccupancySensing, PowerSource } from 'matterbridge/matter/clusters';
 
 /**
  * This is the standard interface for MatterBridge plugins.
