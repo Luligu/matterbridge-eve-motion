@@ -25,6 +25,7 @@ import { MatterHistory } from 'matter-history';
 import { lightSensor, MatterbridgeAccessoryPlatform, MatterbridgeEndpoint, occupancySensor, PlatformConfig, PlatformMatterbridge, powerSource } from 'matterbridge';
 import { AnsiLogger } from 'matterbridge/logger';
 import { IlluminanceMeasurement, OccupancySensing, PowerSource } from 'matterbridge/matter/clusters';
+import { fireAndForget } from 'matterbridge/utils';
 
 /**
  * This is the standard interface for MatterBridge plugins.
@@ -90,12 +91,12 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
 
     this.history.autoPilot(this.motion);
 
-    this.motion.addCommandHandler('identify', async ({ request: { identifyTime } }) => {
+    this.motion.addCommandHandler('identify', ({ request: { identifyTime } }) => {
       this.log.info(`Command identify called identifyTime:${identifyTime}`);
       this.history?.logHistory(false);
     });
 
-    this.motion.addCommandHandler('triggerEffect', async ({ request: { effectIdentifier, effectVariant } }) => {
+    this.motion.addCommandHandler('triggerEffect', ({ request: { effectIdentifier, effectVariant } }) => {
       this.log.info(`Command triggerEffect called effect ${effectIdentifier} variant ${effectVariant}`);
       this.history?.logHistory(false);
     });
@@ -109,16 +110,22 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     await this.motion?.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(500) + 1, 0xfffe), 0)), this.log);
 
     this.interval = setInterval(
-      async () => {
-        if (!this.motion || !this.history) return;
-        this.occupied = !this.occupied;
-        const lux = this.history.getFakeLevel(0, 1000, 0);
-        await this.motion.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: this.occupied }, this.log);
-        await this.motion.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)), this.log);
+      () => {
+        fireAndForget(
+          (async () => {
+            if (!this.motion || !this.history) return;
+            this.occupied = !this.occupied;
+            const lux = this.history.getFakeLevel(0, 1000, 0);
+            await this.motion.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: this.occupied }, this.log);
+            await this.motion.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)), this.log);
 
-        this.history.setLastEvent();
-        this.history.addEntry({ time: this.history.now(), motion: this.occupied === true ? 0 : 1, lux });
-        this.log.info(`Set motion to ${this.occupied} and lux to ${lux}`);
+            this.history.setLastEvent();
+            this.history.addEntry({ time: this.history.now(), motion: this.occupied === true ? 0 : 1, lux });
+            this.log.info(`Set motion to ${this.occupied} and lux to ${lux}`);
+          })(),
+          this.log,
+          'setInterval',
+        );
       },
       60 * 1000 + 200,
     );
