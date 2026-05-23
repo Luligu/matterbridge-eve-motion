@@ -100,7 +100,7 @@
     "checkDependencies": "npx npm-check-updates",
     "updateDependencies": "npx npm-check-updates -u && npm run reset",
     "automator": "node scripts/run-automator.mjs --plugin --no-vitest --enable-promise-rules",
-    "runMeBeforePublish": "npm run cleanBuild && npm run format && npm run lint && npm run build && npm run typecheck && npm run test:coverage",
+    "runMeB eforePublish": "npm run cleanBuild && npm run format && npm run lint && npm run build && npm run typecheck && npm run test:coverage",
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts && npx shx rm -rf node_modules/* node_modules/.[!.]* node_modules/..?* package-lock.json npm-shrinkwrap.json && npm install --omit=dev && npm shrinkwrap --omit=dev",
     "npmPack": "npx shx cp package.json package.json.backup && node scripts/version.mjs dev && npm run prepublishOnly && npm pack && npx shx cp package.json.backup package.json && npx shx rm -f package.json.backup && npm run reset",
     "npmPublishTagDev": "npx shx cp package.json package.json.backup && node scripts/version.mjs dev && npm run prepublishOnly && npm publish --tag dev && npx shx cp package.json.backup package.json && npx shx rm -f package.json.backup && npm run reset",
@@ -114,7 +114,7 @@
     "matterbridge:list": "matterbridge -list"
   },
   "dependencies": {
-    "matter-history": "1.2.2-dev-20260522-2e59c15",
+    "matter-history": "1.2.2-dev-20260523-e0ab3e2",
     "node-ansi-logger": "3.2.1",
     "node-persist-manager": "2.0.2"
   },
