@@ -113,6 +113,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
       () => {
         fireAndForget(
           (async () => {
+            // istanbul ignore next - This is just a precaution, it should never happen that motion or history is undefined here, but we check it just in case.
             if (!this.motion || !this.history) return;
             this.occupied = !this.occupied;
             const lux = this.history.getFakeLevel(0, 1000, 0);
