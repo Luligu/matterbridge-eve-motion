@@ -83,6 +83,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     this.motion.createDefaultOccupancySensingClusterServer(false);
     this.motion.createDefaultIlluminanceMeasurementClusterServer(250);
     this.motion.createDefaultPowerSourceReplaceableBatteryClusterServer(65, PowerSource.BatChargeLevel.Ok, 3000, 'CR2450', 2);
+    this.motion.addRequiredClusters();
 
     // Add the EveHistory cluster to the device as last cluster!
     this.history.createMotionEveHistoryClusterServer(this.motion, this.log);
