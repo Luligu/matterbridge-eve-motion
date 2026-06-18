@@ -22,8 +22,8 @@
  */
 
 import { MatterHistory } from 'matter-history';
-import { lightSensor, MatterbridgeAccessoryPlatform, MatterbridgeEndpoint, occupancySensor, PlatformConfig, PlatformMatterbridge, powerSource } from 'matterbridge';
-import { AnsiLogger } from 'matterbridge/logger';
+import { lightSensor, MatterbridgeAccessoryPlatform, MatterbridgeEndpoint, occupancySensor, type PlatformConfig, type PlatformMatterbridge, powerSource } from 'matterbridge';
+import type { AnsiLogger } from 'matterbridge/logger';
 import { IlluminanceMeasurement, OccupancySensing, PowerSource } from 'matterbridge/matter/clusters';
 import { fireAndForget } from 'matterbridge/utils';
 
@@ -50,19 +50,19 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.8.0')) {
+    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.9.0')) {
       throw new Error(
-        `This plugin requires Matterbridge version >= "3.8.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
+        `This plugin requires Matterbridge version >= "3.9.0". Please update Matterbridge from ${this.matterbridge.matterbridgeVersion} to the latest version in the frontend."`,
       );
     }
 
     this.log.info('Initializing platform:', this.config.name);
   }
 
-  override async onStart(reason?: string) {
+  override async onStart(reason?: string): Promise<void> {
     this.log.info('onStart called with reason:', reason ?? 'none');
 
-    this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory, enableDebug: this.config.debug as boolean });
+    this.history = new MatterHistory(this.log, 'Eve motion', { filePath: this.matterbridge.matterbridgeDirectory, enableDebug: this.config.debug });
 
     this.motion = new MatterbridgeEndpoint(
       [occupancySensor, lightSensor, powerSource],
@@ -103,26 +103,26 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     });
   }
 
-  override async onConfigure() {
+  override async onConfigure(): Promise<void> {
     await super.onConfigure();
     this.log.info('onConfigure called');
 
-    await this.motion?.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: false }, this.log);
-    await this.motion?.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(500) + 1, 0xfffe), 0)), this.log);
+    await this.motion?.setAttribute(OccupancySensing, 'occupancy', { occupied: false }, this.log);
+    await this.motion?.setAttribute(IlluminanceMeasurement, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(500) + 1, 0xfffe), 0)), this.log);
 
     this.interval = setInterval(
       () => {
         fireAndForget(
-          (async () => {
+          (async (): Promise<void> => {
             // istanbul ignore next - This is just a precaution, it should never happen that motion or history is undefined here, but we check it just in case.
             if (!this.motion || !this.history) return;
             this.occupied = !this.occupied;
             const lux = this.history.getFakeLevel(0, 1000, 0);
-            await this.motion.setAttribute(OccupancySensing.Cluster.id, 'occupancy', { occupied: this.occupied }, this.log);
-            await this.motion.setAttribute(IlluminanceMeasurement.Cluster.id, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)), this.log);
+            await this.motion.setAttribute(OccupancySensing, 'occupancy', { occupied: this.occupied }, this.log);
+            await this.motion.setAttribute(IlluminanceMeasurement, 'measuredValue', Math.round(Math.max(Math.min(10000 * Math.log10(lux) + 1, 0xfffe), 0)), this.log);
 
             this.history.setLastEvent();
-            this.history.addEntry({ time: this.history.now(), motion: this.occupied === true ? 0 : 1, lux });
+            this.history.addEntry({ time: this.history.now(), motion: this.occupied ? 0 : 1, lux });
             this.log.info(`Set motion to ${this.occupied} and lux to ${lux}`);
           })(),
           this.log,
@@ -133,11 +133,11 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
     );
   }
 
-  override async onShutdown(reason?: string) {
+  override async onShutdown(reason?: string): Promise<void> {
     await super.onShutdown(reason);
     this.log.info('onShutdown called with reason:', reason ?? 'none');
     await this.history?.close();
     clearInterval(this.interval);
-    if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
+    if (this.config.unregisterOnShutdown) await this.unregisterAllDevices();
   }
 }
