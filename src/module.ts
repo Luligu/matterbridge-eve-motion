@@ -1,7 +1,6 @@
 /**
- * This file contains the class EveMotionPlatform.
- *
- * @file module.ts
+ * @file src/module.ts
+ * @description This file contains the class EveMotionPlatform.
  * @author Luca Liguori
  * @version 2.0.0
  * @license Apache-2.0
@@ -114,7 +113,7 @@ export class EveMotionPlatform extends MatterbridgeAccessoryPlatform {
       () => {
         fireAndForget(
           (async (): Promise<void> => {
-            // istanbul ignore next - This is just a precaution, it should never happen that motion or history is undefined here, but we check it just in case.
+            /* v8 ignore next - This is just a precaution, it should never happen that motion or history is undefined here, but we check it just in case. */
             if (!this.motion || !this.history) return;
             this.occupied = !this.occupied;
             const lux = this.history.getFakeLevel(0, 1000, 0);
